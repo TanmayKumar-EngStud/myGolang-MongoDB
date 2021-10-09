@@ -17,8 +17,7 @@ func CheckIDofPost(id primitive.ObjectID) (Post, error){
 	defer cancel()
 	err := collection.FindOne(ctx, Post{id:id}).Decode(&post)
 	if post.id != id {
-		err = 
-		errors.New("error 400: ID not present")
+		err = errors.New("error 400: Post with This ID not present")
 	}
 	return post, err
 }

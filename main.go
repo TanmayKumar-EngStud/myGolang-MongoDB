@@ -38,14 +38,15 @@ func aCreateUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Creating user")
 	var user User
 	_ = json.NewDecoder(r.Body).Decode(&user)
-
+	// Securing the password using SHA512
+	user.Password = HashPassword(user.Password)
 	collection := Client.Database("AppointyDatabase").Collection("users")
 	ctx, cancel :=context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	result, _ := collection.InsertOne(ctx, user)
 	user.id = result.InsertedID.(primitive.ObjectID)
 	json.NewEncoder(w).Encode(user)
-	fmt.Println("User Id is: ", user)
+	fmt.Println("User Id is: ", user.id)
 }
 
 
@@ -71,7 +72,7 @@ func cCreatePost(r http.ResponseWriter, rq *http.Request) {
 	result, _ := collection.InsertOne(ctx, post)
 	post.id = result.InsertedID.(primitive.ObjectID)
 	json.NewEncoder(r).Encode(post)
-	fmt.Println("Post Id is: ", post)
+	fmt.Println("Post Id is: ", post.id)
 }
 
 func dGETPostByID(r http.ResponseWriter, rq *http.Request) {
@@ -145,9 +146,9 @@ func main() {
 	}
 	fmt.Println("Connected to MongoDB!")
 	
-	http.HandleFunc("/user", UserHandler)
+	http.HandleFunc("/users", UserHandler)
 	http.HandleFunc("/users/", UserHandler)
-	http.HandleFunc("/Post", PostHandler)
+	http.HandleFunc("/Posts", PostHandler)
 	http.HandleFunc("/Posts/", PostHandler)
 	http.HandleFunc("/users/Post", UserPostsHandler) 
 	http.ListenAndServe(":8080",nil)
