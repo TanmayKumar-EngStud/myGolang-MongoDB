@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"path"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,84 +32,57 @@ type Post struct{
 	endTime string `json:"endTime,omitempty" bson:"endTime,omitempty"`
 }
 
-func (user *User) cons() {
-	if user.Password == "" {
-		user.Password = "N/A"
-	}
-	if user.Email == "" {
-		user.Email = "JohnDoe@gmail.com"
-	}
-	if user.Name == "" {
-		user.Name = "John Doe"
-	}
-}
-
-func (post *Post) def() {
-	if post.Caption == "" {
-		post.Caption = "Untitled"
-	}
-	if post.startTime == "" {
-		post.startTime = string(time.Now().Format(time.RFC3339))
-	}
-	if post.endTime == "" {
-		post.endTime = string(time.Now().Local().Add(time.Hour * time.Duration(1)).Format(time.RFC3339))
-	}
-	if &post.user.id == nil {
-		post.user.id = primitive.NewObjectID()
-		post.user.cons()
-	}
-}
-
-
 func aCreateUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("content-type", "application/json") 
+	w.Header().Set("content-type", "application/json") 
 	// create user
 	fmt.Println("Creating user")
 	var user User
 	_ = json.NewDecoder(r.Body).Decode(&user)
-	user.cons()
+
 	collection := Client.Database("AppointyDatabase").Collection("users")
 	ctx, cancel :=context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	result, _ := collection.InsertOne(ctx, user)
-	json.NewEncoder(w).Encode(result)
-	fmt.Println(result)
-	fmt.Println("User Id is: ", user.id)
+	user.id = result.InsertedID.(primitive.ObjectID)
+	json.NewEncoder(w).Encode(user)
+	fmt.Println("User Id is: ", user)
 }
+
+
 func bGETUserByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("context-type","application/json")
-	fmt.Println("The Requested User id is:- ",(r.URL.Path))
-	CheckID := r.URL.Path
+	fmt.Println("The Requested User id is:- ",path.Base(r.URL.Path))
+	CheckID := path.Base(r.URL.Path)
 	checkID, _ := primitive.ObjectIDFromHex(CheckID)
 	user, _ := CheckIDofUser(checkID)
 	json.NewEncoder(w).Encode(user)
 }
 
 func cCreatePost(r http.ResponseWriter, rq *http.Request) {
-	r.Header().Add("content-type", "application/json") 
+	r.Header().Set("content-type", "application/json") 
 	// create post
 	fmt.Println("Creating post")
 	var post Post
 	_ = json.NewDecoder(rq.Body).Decode(&post)
-	post.def()
+
 	collection := Client.Database("AppointyDatabase").Collection("posts")
 	ctx, cancel :=context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	result, _ := collection.InsertOne(ctx, post)
-	json.NewEncoder(r).Encode(result)
-	fmt.Println(result)
-	fmt.Println("Post Id is: ", post.id)
+	post.id = result.InsertedID.(primitive.ObjectID)
+	json.NewEncoder(r).Encode(post)
+	fmt.Println("Post Id is: ", post)
 }
 
 func dGETPostByID(r http.ResponseWriter, rq *http.Request) {
 	r.Header().Set("context-type","application/json")
-	fmt.Println("The Requested post id is:- ",(rq.URL.Path))
-	CheckID := rq.URL.Path
+	fmt.Println("The Requested post id is:- ",path.Base(rq.URL.Path))
+	CheckID := path.Base(rq.URL.Path)
 	checkID, _ := primitive.ObjectIDFromHex(CheckID)
 	Posts, _ := CheckIDofPost(checkID)
 	json.NewEncoder(r).Encode(Posts)
 }
-func eGETAllPosts(r http.ResponseWriter, rq *http.Request) {
+func eGETUserPosts(r http.ResponseWriter, rq *http.Request) {
 	r.Header().Add("content-type", "application/json") 
 	// Getting all posts
 	fmt.Println("Getting all posts")
@@ -153,7 +127,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 func UserPostsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		eGETAllPosts(w, r)
+		eGETUserPosts(w, r)
 	}
 }	
 
@@ -171,8 +145,10 @@ func main() {
 	}
 	fmt.Println("Connected to MongoDB!")
 	
-	http.HandleFunc("/users", UserHandler)
-	http.HandleFunc("/Post", PostHandler)  
+	http.HandleFunc("/user", UserHandler)
+	http.HandleFunc("/users/", UserHandler)
+	http.HandleFunc("/Post", PostHandler)
+	http.HandleFunc("/Posts/", PostHandler)
 	http.HandleFunc("/users/Post", UserPostsHandler) 
 	http.ListenAndServe(":8080",nil)
 }
