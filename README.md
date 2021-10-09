@@ -61,5 +61,14 @@ go run .
 ```
 This thing must be visible in the terminal window :- 
 
-
+<img src= "https://github.com/TanmayKumar-EngStud/myGolang-MongoDB/blob/master/images/terminal%20Start.png">
+<br>
+# After running the go files you can Test for API via Postman in this way :
+<img src= "https://github.com/TanmayKumar-EngStud/myGolang-MongoDB/blob/master/images/finally.png">
+<br>
+<img src= "https://github.com/TanmayKumar-EngStud/myGolang-MongoDB/blob/master/images/post%20POST.png">
+<br>
+# In AppointyDatabase.users
+<br>
+<img src= "https://github.com/TanmayKumar-EngStud/myGolang-MongoDB/blob/master/images/New%20Data%20is%20added%20in%20the%20This%20database.png">
 
