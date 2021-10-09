@@ -77,8 +77,8 @@ func aCreateUser(w http.ResponseWriter, r *http.Request) {
 }
 func bGETUserByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("context-type","application/json")
-	fmt.Println("The Requested User id is:- ",(r.URL.Query()["_id"][0]))
-	CheckID := r.URL.Query()["_id"][0]
+	fmt.Println("The Requested User id is:- ",(r.URL.Path))
+	CheckID := r.URL.Path
 	checkID, _ := primitive.ObjectIDFromHex(CheckID)
 	user, _ := CheckIDofUser(checkID)
 	json.NewEncoder(w).Encode(user)
@@ -102,8 +102,8 @@ func cCreatePost(r http.ResponseWriter, rq *http.Request) {
 
 func dGETPostByID(r http.ResponseWriter, rq *http.Request) {
 	r.Header().Set("context-type","application/json")
-	fmt.Println("The Requested post id is:- ",(rq.URL.Query()["_id"][0]))
-	CheckID := rq.URL.Query()["_id"][0]
+	fmt.Println("The Requested post id is:- ",(rq.URL.Path))
+	CheckID := rq.URL.Path
 	checkID, _ := primitive.ObjectIDFromHex(CheckID)
 	Posts, _ := CheckIDofPost(checkID)
 	json.NewEncoder(r).Encode(Posts)
