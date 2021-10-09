@@ -1,7 +1,7 @@
 package main
 
 // All POST function are going to be made here,
-// Validation of GET function are made in separate go files
+// Validation of GET function are made in separate go files.
 import (
 	"context"
 	"encoding/json"
