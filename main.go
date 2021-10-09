@@ -16,30 +16,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type User struct{
-	id primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name string `json:"Name,omitempty" bson:"Name,omitempty"`
-	Email string `json:"Email,omitempty" bson:"Email,omitempty"`
-	Password string `json:"Password,omitempty" bson:"Password,omitempty"`
-}
-
-type Post struct{
-	id primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Caption string `json:"Caption,omitempty" bson:"Caption,omitempty"`
-	ImgURL string `json:"ImgURL,omitempty" bson:"ImgURL,omitempty"`
-	user User `json:"User,omitempty" bson:"User,omitempty"`
-	startTime string `json:"startTime,omitempty" bson:"startTime,omitempty"`
-	endTime string `json:"endTime,omitempty" bson:"endTime,omitempty"`
-}
-
+// A. Create a user
+// B. Get a user by ID
+// C. Create a post
+// D. Get a post by ID
+// E. Get all posts by user ID
 func aCreateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json") 
 	// create user
 	fmt.Println("Creating user")
-	var user User
-	_ = json.NewDecoder(r.Body).Decode(&user)
-	// Securing the password using SHA512
-	user.Password = HashPassword(user.Password)
+	var Newuser User
+	_ = json.NewDecoder(r.Body).Decode(&Newuser)
+	var user User;    // This extra step is added, in case some of the elements are not entered in the new user
+	user= FillUser(Newuser) 
+	user.Password = HashPassword(user.Password) // Securing the password using SHA512
 	collection := Client.Database("AppointyDatabase").Collection("users")
 	ctx, cancel :=context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -48,7 +38,6 @@ func aCreateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 	fmt.Println("User Id is: ", user.id)
 }
-
 
 func bGETUserByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("context-type","application/json")
@@ -63,9 +52,10 @@ func cCreatePost(r http.ResponseWriter, rq *http.Request) {
 	r.Header().Set("content-type", "application/json") 
 	// create post
 	fmt.Println("Creating post")
-	var post Post
-	_ = json.NewDecoder(rq.Body).Decode(&post)
-
+	var Newpost Post
+	_ = json.NewDecoder(rq.Body).Decode(&Newpost)
+	var post Post;    // This extra step is added, in case some of the elements are not entered in the new post
+	post= FillPost(Newpost)
 	collection := Client.Database("AppointyDatabase").Collection("posts")
 	ctx, cancel :=context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -106,8 +96,7 @@ func eGETUserPosts(r http.ResponseWriter, rq *http.Request) {
 	}
 	json.NewEncoder(r).Encode(posts)
 }
-
-
+// Handlers Sepratiing on the basis of HTTP Method
 func UserHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
@@ -124,7 +113,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		dGETPostByID(w, r)
 	}
 }
-
 func UserPostsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
@@ -132,6 +120,7 @@ func UserPostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }	
 
+// Client is global
 var Client *mongo.Client
 func main() {
 	// create client
