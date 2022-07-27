@@ -3,10 +3,7 @@ Tanmay Kumar
 <img src="https://www.vhv.rs/dpng/d/211-2119308_transparent-mongodb-png-mongodb-update-one-collection-golang.png" align="right"
      alt="GoLang img didn't loaded :(" width="120" >
 
-The task is to develop a basic version of aInstagram. You are only required to develop the API for the
-system. Below are the details.
 Aim is to Design and Develop an **HTTP**, **JSON**, **API** capable of the following operations,<br>
-Moreover the conditions that I was able to fulfil up I have marked them as well.
 
 * Create A User
   * [X] Should Be a POST request
